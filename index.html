@@ -251,7 +251,8 @@
             }
 
             // Get the specific question group based on type
-            const questionGroup = document.querySelector(`.question-group:${type === 'realistic' ? 'first' : 'last'}-of-type`);
+            const questionGroups = document.querySelectorAll('.question-group');
+            const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
             if (!questionGroup) {
                 console.error('Question group not found');
                 return;
@@ -330,7 +331,6 @@
 
                 console.log('Successfully loaded images:', availableImages);
                 generateImagePairs();
-                isImagesLoaded = true; // Set flag after images are loaded
                 loadNextImagePair();
             } catch (error) {
                 console.error('Error loading image list:', error);
@@ -365,6 +365,64 @@
 
             // Update progress
             document.getElementById('questionProgress').textContent = `${questionCount}/${TOTAL_QUESTIONS}`;
+        }
+
+        function recordAnswer(type, choice) {
+            if (!isImagesLoaded) {
+                console.error('Images not yet loaded');
+                return;
+            }
+
+            // Get the specific question group based on type
+            const questionGroups = document.querySelectorAll('.question-group');
+            const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
+            if (!questionGroup) {
+                console.error('Question group not found');
+                return;
+            }
+
+            // Find and update buttons in the question group
+            const buttons = questionGroup.querySelectorAll('.button-group button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+
+            // Set selected button style
+            const selectedButton = Array.from(buttons).find(btn => btn.textContent === choice);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            // Update current answer display
+            document.getElementById(`${type}-answer`).textContent = `Current answer: ${choice}`;
+
+            // Remove any existing answer for this question type
+            const existingAnswerIndex = results.findIndex(r =>
+                r.question === questionCount && r.type === type
+            );
+            if (existingAnswerIndex !== -1) {
+                results.splice(existingAnswerIndex, 1);
+            }
+
+            // Add new answer
+            const currentPair = imagePairs[currentPairIndex];
+            results.push({
+                question: questionCount,
+                type: type,
+                choice: choice,
+                pairIndex: currentPairIndex,
+                imageType: currentPair.type,
+                sourceA: currentPair.sourceA,
+                sourceB: currentPair.sourceB,
+                imageA: currentPair.imageA,
+                imageB: currentPair.imageB
+            });
+
+            // Check if both questions are answered
+            const currentResults = results.filter(r => r.question === questionCount);
+            const nextButton = document.getElementById('nextButton');
+            const submitButton = document.querySelector('.submit-button');
+
+            if (nextButton) nextButton.disabled = currentResults.length < 2;
+            if (submitButton) submitButton.disabled = currentResults.length < 2;
         }
 
         function showSubmitScreen() {
