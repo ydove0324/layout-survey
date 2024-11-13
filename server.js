@@ -30,9 +30,8 @@ app.post('/submit-results', (req, res) => {
     res.json({ status: 'success', fileNumber: newFileNumber });
 });
 
-app.get('/images', async (req, res) => {
-    console.log('收到图片列表请求');
-    console.log('请求头:', req.headers);
+app.get('/image-pairs', async (req, res) => {
+    console.log('收到图片配对请求');
 
     try {
         const imagesData = await fs.promises.readFile(path.join(__dirname, 'images.json'), 'utf8');
@@ -41,12 +40,29 @@ app.get('/images', async (req, res) => {
         const images = JSON.parse(imagesData);
         console.log('成功解析 JSON');
 
-        res.json(images);
-        console.log('成功发送响应');
+        // 生成20对图片配对
+        const imagePairs = [];
+        const TOTAL_PAIRS = 20;
+
+        for (let i = 0; i < TOTAL_PAIRS; i++) {
+            const imageA = images[Math.floor(Math.random() * images.length)];
+            let imageB;
+            do {
+                imageB = images[Math.floor(Math.random() * images.length)];
+            } while (imageB === imageA);
+
+            imagePairs.push({
+                imageA: imageA,
+                imageB: imageB
+            });
+        }
+
+        res.json(imagePairs);
+        console.log('成功发送图片配对');
     } catch (error) {
         console.error('服务器错误:', error);
         res.status(500).json({
-            error: '加载图片列表失败',
+            error: '加载图片配对失败',
             details: error.message
         });
     }

@@ -196,146 +196,29 @@
 
     <script>
         const TOTAL_QUESTIONS = 20;
+        let imagePairs = [];  // Changed to let since we'll assign it from server
+        const results = [];
+        let currentPairIndex = 0;
+        let questionCount = 0;
 
-        const imagePairs = [];
-
-        function getRandomElement(array) {
-            return array[Math.floor(Math.random() * array.length)];
-        }
-
-        function generateImagePairs() {
-            const roomTypes = ['living_room', 'dining_room', 'bedroom'];
-
-            // Generate TOTAL_QUESTIONS number of pairs
-            for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-                const type = getRandomElement(roomTypes);
-
-                // Update compare sources to include holodeck
-                const compareSources = type === 'dining_room'
-                    ? ['diffuscene', 'holodeck']  // Add holodeck for dining room
-                    : ['diffuscene', 'layoutGPT', 'holodeck'];  // Add holodeck for other rooms
-
-                // Randomly select source for comparison
-                const compareSource = getRandomElement(compareSources);
-
-                // Randomly decide which image goes to A or B
-                const isOursFirst = Math.random() < 0.5;
-
-                const pair = {
-                    type: type,
-                    // Randomly select an image from the available images for this type and source
-                    imageA: isOursFirst
-                        ? `./ours/${type}/${getRandomElement(availableImages.ours[type])}`
-                        : `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`,
-                    imageB: isOursFirst
-                        ? `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`
-                        : `./ours/${type}/${getRandomElement(availableImages.ours[type])}`,
-                    sourceA: isOursFirst ? 'ours' : compareSource,
-                    sourceB: isOursFirst ? compareSource : 'ours'
-                };
-
-                imagePairs.push(pair);
-            }
-        }
-
-        let availableImages = {};
-
-        // Add a flag to track if images are loaded
-        let isImagesLoaded = false;
-
-        // Update recordAnswer function to check if images are loaded
-        function recordAnswer(type, choice) {
-            // Get the specific question group based on type
-            const questionGroups = document.querySelectorAll('.question-group');
-            const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
-            if (!questionGroup) {
-                console.error('Question group not found');
-                return;
-            }
-
-            // Find and update buttons in the question group
-            const buttons = questionGroup.querySelectorAll('.button-group button');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-
-            // Set selected button style
-            const selectedButton = Array.from(buttons).find(btn => btn.textContent === choice);
-            if (selectedButton) {
-                selectedButton.classList.add('selected');
-            }
-
-            // Update current answer display
-            document.getElementById(`${type}-answer`).textContent = `Current answer: ${choice}`;
-
-            // Remove any existing answer for this question type
-            const existingAnswerIndex = results.findIndex(r =>
-                r.question === questionCount && r.type === type
-            );
-            if (existingAnswerIndex !== -1) {
-                results.splice(existingAnswerIndex, 1);
-            }
-
-            // Add new answer
-            const currentPair = imagePairs[currentPairIndex];
-            results.push({
-                question: questionCount,
-                type: type,
-                choice: choice,
-                pairIndex: currentPairIndex,
-                imageType: currentPair.type,
-                sourceA: currentPair.sourceA,
-                sourceB: currentPair.sourceB,
-                imageA: currentPair.imageA,
-                imageB: currentPair.imageB
-            });
-
-            // Check if both questions are answered
-            const currentResults = results.filter(r => r.question === questionCount);
-            const nextButton = document.getElementById('nextButton');
-            const submitButton = document.querySelector('.submit-button');
-
-            if (nextButton) nextButton.disabled = currentResults.length < 2;
-            if (submitButton) submitButton.disabled = currentResults.length < 2;
-        }
-
-        // Update fetchImageList function to set the flag
         async function fetchImageList() {
             try {
-                console.log('Fetching image list from backend...');
-                const response = await fetch('http://62.234.18.48:3000/images');
+                console.log('Fetching image pairs from backend...');
+                const response = await fetch('http://62.234.18.48:3000/image-pairs');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data = await response.json();
-                availableImages = {
-                    ours: {},
-                    diffuscene: {},
-                    layoutGPT: {},
-                    holodeck: {}
-                };
-
-                // Restructure the data
-                Object.entries(data).forEach(([key, value]) => {
-                    const [source, roomType] = key.split('/');
-                    if (!availableImages[source]) {
-                        availableImages[source] = {};
-                    }
-                    availableImages[source][roomType] = value;
-                });
-
-                console.log('Successfully loaded images:', availableImages);
-                generateImagePairs();
+                // Directly assign the image pairs from server
+                imagePairs = await response.json();
+                console.log('Successfully loaded image pairs:', imagePairs);
                 loadNextImagePair();
             } catch (error) {
-                console.error('Error loading image list:', error);
+                console.error('Error loading image pairs:', error);
                 alert('Failed to load images. Please try again later.');
             }
         }
-
-        const results = [];
-        let currentPairIndex = 0;
-        let questionCount = 0;
 
         function loadNextImagePair() {
             if (questionCount >= TOTAL_QUESTIONS) {
@@ -352,9 +235,8 @@
             // Disable next button
             document.getElementById('nextButton').disabled = true;
 
-            // Generate a new random pair for each question instead of reusing existing pairs
-            generateImagePairs();
-            const pair = imagePairs[0];  // Use the newly generated pair
+            // Use the pre-generated pair from server
+            const pair = imagePairs[questionCount];
             document.getElementById('imageA').src = pair.imageA;
             document.getElementById('imageB').src = pair.imageB;
             questionCount++;
@@ -364,11 +246,6 @@
         }
 
         function recordAnswer(type, choice) {
-            if (!isImagesLoaded) {
-                console.error('Images not yet loaded');
-                return;
-            }
-
             // Get the specific question group based on type
             const questionGroups = document.querySelectorAll('.question-group');
             const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
