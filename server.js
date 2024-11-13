@@ -27,22 +27,27 @@ app.post('/submit-results', (req, res) => {
 });
 
 app.get('/images', async (req, res) => {
+    console.log('收到图片列表请求');
+    console.log('请求头:', req.headers);
+
     try {
-        console.log('Attempting to read images.json from:', path.join(__dirname, 'images.json'));
-
         const imagesData = await fs.promises.readFile(path.join(__dirname, 'images.json'), 'utf8');
-        const images = JSON.parse(imagesData);
+        console.log('成功读取 images.json');
 
-        console.log('Successfully loaded images.json');
+        const images = JSON.parse(imagesData);
+        console.log('成功解析 JSON');
 
         res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET');
+        res.header('Access-Control-Allow-Headers', 'Content-Type');
+
         res.json(images);
+        console.log('成功发送响应');
     } catch (error) {
-        console.error('Error reading images.json:', error);
+        console.error('服务器错误:', error);
         res.status(500).json({
-            error: 'Failed to load image list',
-            details: error.message,
-            path: path.join(__dirname, 'images.json')
+            error: '加载图片列表失败',
+            details: error.message
         });
     }
 });
