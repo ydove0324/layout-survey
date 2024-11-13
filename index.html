@@ -264,6 +264,9 @@
 
             // Update progress
             document.getElementById('questionProgress').textContent = `${questionCount}/${TOTAL_QUESTIONS}`;
+
+            // Scroll to top of page
+            window.scrollTo(0, 0);
         }
 
         function recordAnswer(type, choice) {
@@ -297,12 +300,12 @@
             }
 
             // Add new answer
-            const currentPair = imagePairs[currentPairIndex];
+            const currentPair = imagePairs[questionCount - 1];
             results.push({
                 question: questionCount,
                 type: type,
                 choice: choice,
-                pairIndex: currentPairIndex,
+                pairIndex: questionCount - 1,
                 imageType: currentPair.type,
                 sourceA: currentPair.sourceA,
                 sourceB: currentPair.sourceB,
@@ -349,10 +352,13 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Hide the main survey container
-                    document.querySelector('.container').style.display = 'none';
-                    // Show the success container
+                    // Hide all other containers
+                    document.getElementById('startContainer').style.display = 'none';
+                    document.getElementById('surveyContainer').style.display = 'none';
+                    // Show success container
                     document.getElementById('successContainer').style.display = 'block';
+                    // Scroll to top of page
+                    window.scrollTo(0, 0);
                 })
                 .catch(error => {
                     console.error('Error submitting results:', error);
