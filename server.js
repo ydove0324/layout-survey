@@ -34,27 +34,42 @@ app.get('/image-pairs', async (req, res) => {
     console.log('收到图片配对请求');
 
     try {
-        const imagesData = await fs.promises.readFile(path.join(__dirname, 'images.json'), 'utf8');
-        console.log('成功读取 images.json');
-
-        const images = JSON.parse(imagesData);
-        console.log('成功解析 JSON');
-
-        // 生成20对图片配对
+        const TOTAL_QUESTIONS = 20;
         const imagePairs = [];
-        const TOTAL_PAIRS = 20;
 
-        for (let i = 0; i < TOTAL_PAIRS; i++) {
-            const imageA = images[Math.floor(Math.random() * images.length)];
-            let imageB;
-            do {
-                imageB = images[Math.floor(Math.random() * images.length)];
-            } while (imageB === imageA);
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
 
-            imagePairs.push({
-                imageA: imageA,
-                imageB: imageB
-            });
+        // Read and parse the images configuration
+        const imagesData = await fs.promises.readFile(path.join(__dirname, 'images.json'), 'utf8');
+        const availableImages = JSON.parse(imagesData);
+
+        const roomTypes = ['living_room', 'dining_room', 'bedroom'];
+
+        for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+            const type = getRandomElement(roomTypes);
+
+            const compareSources = type === 'dining_room'
+                ? ['diffuscene', 'holodeck']
+                : ['diffuscene', 'layoutGPT', 'holodeck'];
+
+            const compareSource = getRandomElement(compareSources);
+            const isOursFirst = Math.random() < 0.5;
+
+            const pair = {
+                type: type,
+                imageA: isOursFirst
+                    ? `./ours/${type}/${getRandomElement(availableImages.ours[type])}`
+                    : `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`,
+                imageB: isOursFirst
+                    ? `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`
+                    : `./ours/${type}/${getRandomElement(availableImages.ours[type])}`,
+                sourceA: isOursFirst ? 'ours' : compareSource,
+                sourceB: isOursFirst ? compareSource : 'ours'
+            };
+
+            imagePairs.push(pair);
         }
 
         res.json(imagePairs);
