@@ -240,84 +240,25 @@
 
         let availableImages = {};
 
-        // Add this function to fetch the JSON file
-        async function fetchImageList() {
-            try {
-                console.log('Fetching image list from backend...');
-                const response = await fetch('http://localhost:3000/images');
+        // Add a flag to track if images are loaded
+        let isImagesLoaded = false;
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                availableImages = {
-                    ours: {},
-                    diffuscene: {},
-                    layoutGPT: {},
-                    holodeck: {}
-                };
-
-                // Restructure the data
-                Object.entries(data).forEach(([key, value]) => {
-                    const [source, roomType] = key.split('/');
-                    if (!availableImages[source]) {
-                        availableImages[source] = {};
-                    }
-                    availableImages[source][roomType] = value;
-                });
-
-                console.log('Successfully loaded images:', availableImages);
-                generateImagePairs();
-                loadNextImagePair();
-            } catch (error) {
-                console.error('Error loading image list:', error);
-                alert('Failed to load images. Please try again later.');
-            }
-        }
-
-        const results = [];
-        let currentPairIndex = 0;
-        let questionCount = 0;
-
-        function loadNextImagePair() {
-            if (questionCount >= TOTAL_QUESTIONS) {
-                showSubmitScreen();
+        // Update recordAnswer function to check if images are loaded
+        function recordAnswer(type, choice) {
+            if (!isImagesLoaded) {
+                console.error('Images not yet loaded');
                 return;
             }
 
-            // Reset all buttons and current answer displays
-            const allButtons = document.querySelectorAll('.button-group button');
-            allButtons.forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('realistic-answer').textContent = '';
-            document.getElementById('beautiful-answer').textContent = '';
-
-            // Disable next button
-            document.getElementById('nextButton').disabled = true;
-
-            currentPairIndex = Math.floor(Math.random() * imagePairs.length);
-            const pair = imagePairs[currentPairIndex];
-            document.getElementById('imageA').src = pair.imageA;
-            document.getElementById('imageB').src = pair.imageB;
-            questionCount++;
-
-            // Update progress
-            document.getElementById('questionProgress').textContent = `${questionCount}/${TOTAL_QUESTIONS}`;
-        }
-
-        function recordAnswer(type, choice) {
-            // Find the question group for this type
-            const questionGroups = document.querySelectorAll('.question-group');
-            let targetGroup;
-            for (const group of questionGroups) {
-                if (group.querySelector('p').textContent.toLowerCase().includes(type)) {
-                    targetGroup = group;
-                    break;
-                }
+            // Get the specific question group based on type
+            const questionGroup = document.querySelector(`.question-group:${type === 'realistic' ? 'first' : 'last'}-of-type`);
+            if (!questionGroup) {
+                console.error('Question group not found');
+                return;
             }
 
             // Find and update buttons in the question group
-            const buttons = targetGroup.querySelectorAll('button');
+            const buttons = questionGroup.querySelectorAll('.button-group button');
             buttons.forEach(btn => btn.classList.remove('selected'));
 
             // Set selected button style
@@ -358,6 +299,72 @@
 
             if (nextButton) nextButton.disabled = currentResults.length < 2;
             if (submitButton) submitButton.disabled = currentResults.length < 2;
+        }
+
+        // Update fetchImageList function to set the flag
+        async function fetchImageList() {
+            try {
+                console.log('Fetching image list from backend...');
+                const response = await fetch('http://localhost:3000/images');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                availableImages = {
+                    ours: {},
+                    diffuscene: {},
+                    layoutGPT: {},
+                    holodeck: {}
+                };
+
+                // Restructure the data
+                Object.entries(data).forEach(([key, value]) => {
+                    const [source, roomType] = key.split('/');
+                    if (!availableImages[source]) {
+                        availableImages[source] = {};
+                    }
+                    availableImages[source][roomType] = value;
+                });
+
+                console.log('Successfully loaded images:', availableImages);
+                generateImagePairs();
+                isImagesLoaded = true; // Set flag after images are loaded
+                loadNextImagePair();
+            } catch (error) {
+                console.error('Error loading image list:', error);
+                alert('Failed to load images. Please try again later.');
+            }
+        }
+
+        const results = [];
+        let currentPairIndex = 0;
+        let questionCount = 0;
+
+        function loadNextImagePair() {
+            if (questionCount >= TOTAL_QUESTIONS) {
+                showSubmitScreen();
+                return;
+            }
+
+            // Reset all buttons and current answer displays
+            const allButtons = document.querySelectorAll('.button-group button');
+            allButtons.forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('realistic-answer').textContent = '';
+            document.getElementById('beautiful-answer').textContent = '';
+
+            // Disable next button
+            document.getElementById('nextButton').disabled = true;
+
+            currentPairIndex = Math.floor(Math.random() * imagePairs.length);
+            const pair = imagePairs[currentPairIndex];
+            document.getElementById('imageA').src = pair.imageA;
+            document.getElementById('imageB').src = pair.imageB;
+            questionCount++;
+
+            // Update progress
+            document.getElementById('questionProgress').textContent = `${questionCount}/${TOTAL_QUESTIONS}`;
         }
 
         function showSubmitScreen() {
