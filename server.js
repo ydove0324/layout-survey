@@ -60,11 +60,11 @@ app.get('/image-pairs', async (req, res) => {
             const pair = {
                 type: type,
                 imageA: isOursFirst
-                    ? `./ours/${type}/${getRandomElement(availableImages.ours[type])}`
-                    : `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`,
+                    ? `ours/${type}/${getRandomElement(availableImages[`ours/${type}`])}`
+                    : `${compareSource}/${type}/${getRandomElement(availableImages[`${compareSource}/${type}`])}`,
                 imageB: isOursFirst
-                    ? `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`
-                    : `./ours/${type}/${getRandomElement(availableImages.ours[type])}`,
+                    ? `${compareSource}/${type}/${getRandomElement(availableImages[`${compareSource}/${type}`])}`
+                    : `ours/${type}/${getRandomElement(availableImages[`ours/${type}`])}`,
                 sourceA: isOursFirst ? 'ours' : compareSource,
                 sourceB: isOursFirst ? compareSource : 'ours'
             };
@@ -75,7 +75,7 @@ app.get('/image-pairs', async (req, res) => {
         res.json(imagePairs);
         console.log('成功发送图片配对');
     } catch (error) {
-        console.error('服务器错误:', error);
+        console.error('详细错误信息:', error);
         res.status(500).json({
             error: '加载图片配对失败',
             details: error.message
