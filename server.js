@@ -28,12 +28,22 @@ app.post('/submit-results', (req, res) => {
 
 app.get('/images', async (req, res) => {
     try {
+        console.log('Attempting to read images.json from:', path.join(__dirname, 'images.json'));
+
         const imagesData = await fs.promises.readFile(path.join(__dirname, 'images.json'), 'utf8');
         const images = JSON.parse(imagesData);
+
+        console.log('Successfully loaded images.json');
+
+        res.header('Access-Control-Allow-Origin', '*');
         res.json(images);
     } catch (error) {
         console.error('Error reading images.json:', error);
-        res.status(500).json({ error: 'Failed to load image list' });
+        res.status(500).json({
+            error: 'Failed to load image list',
+            details: error.message,
+            path: path.join(__dirname, 'images.json')
+        });
     }
 });
 
