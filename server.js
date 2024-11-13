@@ -4,7 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
+}));
 app.use(express.json());
 
 app.post('/submit-results', (req, res) => {
@@ -36,10 +40,6 @@ app.get('/images', async (req, res) => {
 
         const images = JSON.parse(imagesData);
         console.log('成功解析 JSON');
-
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET');
-        res.header('Access-Control-Allow-Headers', 'Content-Type');
 
         res.json(images);
         console.log('成功发送响应');
