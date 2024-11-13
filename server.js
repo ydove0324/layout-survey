@@ -33,6 +33,17 @@ app.post('/submit-results', (req, res) => {
     res.json({ status: 'success', fileNumber: newFileNumber });
 });
 
+app.get('/images', async (req, res) => {
+    try {
+        // 从文件系统读取 images.json
+        const imagesData = await fs.readFile(path.join(__dirname, 'images.json'), 'utf8');
+        const images = JSON.parse(imagesData);
+        res.json(images);
+    } catch (error) {
+        console.error('Error reading images.json:', error);
+        res.status(500).json({ error: 'Failed to load image list' });
+    }
+});
 
 // 添加 hello 路由
 app.get('/hello', (req, res) => {

@@ -243,14 +243,21 @@
         // Add this function to fetch the JSON file
         async function fetchImageList() {
             try {
-                const response = await fetch('./images.json');
+                console.log('Fetching image list from backend...');
+                const response = await fetch('http://localhost:3000/images');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 availableImages = await response.json();
-                // Generate pairs after we have the image list
+                console.log('Successfully loaded images:', availableImages);
+
                 generateImagePairs();
                 loadNextImagePair();
             } catch (error) {
                 console.error('Error loading image list:', error);
-                alert('Error loading images. Please refresh the page.');
+                alert('Failed to load images. Please try again later.');
             }
         }
 
