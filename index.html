@@ -128,7 +128,23 @@
 </head>
 
 <body>
-    <div class="container">
+    <!-- Add start container -->
+    <div id="startContainer" class="container">
+        <h1>图片对比调查问卷</h1>
+        <div class="intro-text">
+            <p>欢迎参与我们的调查问卷！</p>
+            <p>在这个调查中，您将看到20对不同的室内场景图片。对于每一对图片，您需要回答两个问题：</p>
+            <ul>
+                <li>哪个房间的摆放看起来更真实合理？</li>
+                <li>哪个房间的摆放看起来更美观？（只关注摆放布局，不考虑家具本身的样式）</li>
+            </ul>
+            <p>整个过程大约需要5-10分钟。</p>
+        </div>
+        <button onclick="startSurvey()" class="next-button">开始调查</button>
+    </div>
+
+    <!-- Add id to main survey container -->
+    <div id="surveyContainer" class="container" style="display: none;">
         <h1>Image Comparison Survey</h1>
         <div class="progress-bar">
             <div id="progress" style="width: 0%"></div>
@@ -193,10 +209,10 @@
             for (let i = 0; i < TOTAL_QUESTIONS; i++) {
                 const type = getRandomElement(roomTypes);
 
-                // Only use diffuscene for dining_room, use both for others
+                // Update compare sources to include holodeck
                 const compareSources = type === 'dining_room'
-                    ? ['diffuscene']
-                    : ['diffuscene', 'layoutGPT'];
+                    ? ['diffuscene', 'holodeck']  // Add holodeck for dining room
+                    : ['diffuscene', 'layoutGPT', 'holodeck'];  // Add holodeck for other rooms
 
                 // Randomly select source for comparison
                 const compareSource = getRandomElement(compareSources);
@@ -216,7 +232,21 @@
             }
         }
 
-        generateImagePairs();
+        let availableImages = {};
+
+        // Add this function to fetch the JSON file
+        async function fetchImageList() {
+            try {
+                const response = await fetch('./images.json');
+                availableImages = await response.json();
+                // Generate pairs after we have the image list
+                generateImagePairs();
+                loadNextImagePair();
+            } catch (error) {
+                console.error('Error loading image list:', error);
+                alert('Error loading images. Please refresh the page.');
+            }
+        }
 
         const results = [];
         let currentPairIndex = 0;
@@ -343,7 +373,14 @@
                 });
         }
 
-        loadNextImagePair();
+        // Add start survey function
+        function startSurvey() {
+            document.getElementById('startContainer').style.display = 'none';
+            document.getElementById('surveyContainer').style.display = 'block';
+            fetchImageList();  // Load image list first
+        }
+
+        // Comment out or remove the initial loadNextImagePair
     </script>
 </body>
 
