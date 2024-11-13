@@ -250,9 +250,24 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                availableImages = await response.json();
-                console.log('Successfully loaded images:', availableImages);
+                const data = await response.json();
+                availableImages = {
+                    ours: {},
+                    diffuscene: {},
+                    layoutGPT: {},
+                    holodeck: {}
+                };
 
+                // Restructure the data
+                Object.entries(data).forEach(([key, value]) => {
+                    const [source, roomType] = key.split('/');
+                    if (!availableImages[source]) {
+                        availableImages[source] = {};
+                    }
+                    availableImages[source][roomType] = value;
+                });
+
+                console.log('Successfully loaded images:', availableImages);
                 generateImagePairs();
                 loadNextImagePair();
             } catch (error) {
