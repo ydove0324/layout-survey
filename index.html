@@ -132,13 +132,14 @@
     <div id="startContainer" class="container">
         <h1>图片对比调查问卷</h1>
         <div class="intro-text">
-            <p>欢迎参与我们的调查问卷！</p>
-            <p>在这个调查中，您将看到20对不同的室内场景图片。对于每一对图片，您需要回答两个问题：</p>
+            <p>感谢您参与我们的调查！</p>
+            <p>这是一份关于室内场景布局设计的问卷，请忽略家具的具体样式。在这些图像中，相同颜色的物体代表一个独立的模型。</p>
+            <p>在问卷中，您将看到20组室内场景图片。对于每组图片，请回答以下两个问题：</p>
             <ul>
-                <li>哪个房间的摆放看起来更真实合理？</li>
-                <li>哪个房间的摆放看起来更美观？（只关注摆放布局，不考虑家具本身的样式）</li>
+                <li>哪个房间的摆放更真实合理？</li>
+                <li>哪个房间的摆放更美观？</li>
             </ul>
-            <p>整个过程大约需要5-10分钟。</p>
+            <p>完成整个问卷大约需要5到10分钟。感谢您的参与！</p>
         </div>
         <button onclick="startSurvey()" class="next-button">开始调查</button>
     </div>
@@ -377,7 +378,7 @@
         function startSurvey() {
             document.getElementById('startContainer').style.display = 'none';
             document.getElementById('surveyContainer').style.display = 'block';
-            fetchImageList();  // Load image list first
+            loadNextImagePair();
         }
 
         // Comment out or remove the initial loadNextImagePair
