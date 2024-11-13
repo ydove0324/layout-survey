@@ -223,8 +223,13 @@
 
                 const pair = {
                     type: type,
-                    imageA: isOursFirst ? `./ours/${type}/image1.png` : `./${compareSource}/${type}/image1.png`,
-                    imageB: isOursFirst ? `./${compareSource}/${type}/image1.png` : `./ours/${type}/image1.png`,
+                    // Randomly select an image from the available images for this type and source
+                    imageA: isOursFirst
+                        ? `./ours/${type}/${getRandomElement(availableImages.ours[type])}`
+                        : `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`,
+                    imageB: isOursFirst
+                        ? `./${compareSource}/${type}/${getRandomElement(availableImages[compareSource][type])}`
+                        : `./ours/${type}/${getRandomElement(availableImages.ours[type])}`,
                     sourceA: isOursFirst ? 'ours' : compareSource,
                     sourceB: isOursFirst ? compareSource : 'ours'
                 };
@@ -378,7 +383,7 @@
         function startSurvey() {
             document.getElementById('startContainer').style.display = 'none';
             document.getElementById('surveyContainer').style.display = 'block';
-            loadNextImagePair();
+            fetchImageList();  // Load image list first
         }
 
         // Comment out or remove the initial loadNextImagePair
