@@ -245,11 +245,6 @@
 
         // Update recordAnswer function to check if images are loaded
         function recordAnswer(type, choice) {
-            if (!isImagesLoaded) {
-                console.error('Images not yet loaded');
-                return;
-            }
-
             // Get the specific question group based on type
             const questionGroups = document.querySelectorAll('.question-group');
             const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
@@ -306,7 +301,7 @@
         async function fetchImageList() {
             try {
                 console.log('Fetching image list from backend...');
-                const response = await fetch('http://localhost:3000/images');
+                const response = await fetch('http://62.234.18.48:3000/images');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -357,8 +352,9 @@
             // Disable next button
             document.getElementById('nextButton').disabled = true;
 
-            currentPairIndex = Math.floor(Math.random() * imagePairs.length);
-            const pair = imagePairs[currentPairIndex];
+            // Generate a new random pair for each question instead of reusing existing pairs
+            generateImagePairs();
+            const pair = imagePairs[0];  // Use the newly generated pair
             document.getElementById('imageA').src = pair.imageA;
             document.getElementById('imageB').src = pair.imageB;
             questionCount++;
@@ -446,7 +442,7 @@
         }
 
         function submitResults() {
-            fetch('http://localhost:3000/submit-results', {
+            fetch('http://62.234.18.48:3000/submit-results', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
