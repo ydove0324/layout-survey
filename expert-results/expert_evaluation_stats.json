@@ -1,0 +1,9 @@
+{
+    "total_images": 400,
+    "average_scores": {
+        "composition": 3.29,
+        "semantic": 3.21,
+        "aesthetic": 3.29,
+        "overall": 3.26
+    }
+}

@@ -13,12 +13,17 @@ app.use(express.json());
 
 app.post('/submit-results', (req, res) => {
     const results = req.body.results;
+    const isExpert = req.body.expert === true;  // 检查是否为专家评估
 
-    if (!fs.existsSync('results')) {
-        fs.mkdirSync('results');
+    // 选择对应的结果文件夹
+    const resultsDir = isExpert ? 'expert-results' : 'results';
+
+    // 确保文件夹存在
+    if (!fs.existsSync(resultsDir)) {
+        fs.mkdirSync(resultsDir);
     }
 
-    const files = fs.readdirSync('results');
+    const files = fs.readdirSync(resultsDir);
 
     let newFileNumber = 1;
     if (files.length > 0) {
@@ -26,7 +31,7 @@ app.post('/submit-results', (req, res) => {
         newFileNumber = Math.max(...numbers) + 1;
     }
 
-    fs.writeFileSync(`results/${newFileNumber}.json`, JSON.stringify(results, null, 2));
+    fs.writeFileSync(`${resultsDir}/${newFileNumber}.json`, JSON.stringify(results, null, 2));
     res.json({ status: 'success', fileNumber: newFileNumber });
 });
 
@@ -78,6 +83,40 @@ app.get('/image-pairs', async (req, res) => {
         console.error('详细错误信息:', error);
         res.status(500).json({
             error: '加载图片配对失败',
+            details: error.message
+        });
+    }
+});
+
+app.get('/expert-images/:index', async (req, res) => {
+    console.log('收到专家评估图片请求，索引:', req.params.index);
+
+    try {
+        const expertsDir = path.join(__dirname, 'experts');
+        const allImages = fs.readdirSync(expertsDir)
+            .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
+            .sort(); // 确保图片顺序一致
+
+        const index = parseInt(req.params.index);
+
+        // 检查索引是否有效
+        if (index < 0 || index >= allImages.length) {
+            throw new Error('Invalid image index');
+        }
+
+        res.json({
+            completed: false,
+            image: {
+                path: `experts/${allImages[index]}`,
+                id: allImages[index]
+            }
+        });
+
+        console.log('成功发送专家评估图片:', allImages[index]);
+    } catch (error) {
+        console.error('详细错误信息:', error);
+        res.status(500).json({
+            error: '加载专家评估图片失败',
             details: error.message
         });
     }

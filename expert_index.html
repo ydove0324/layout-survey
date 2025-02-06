@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Comparison Survey</title>
+    <style>
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .button-group button.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #4CAF50;
+            background-color: white;
+            color: #4CAF50;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .image-wrapper {
+            position: relative;
+            text-align: center;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            max-width: 350px;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            background-color: #f5f5f5;
+        }
+
+        .image-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+
+        .button-group {
+            margin: 10px 0;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #4CAF50;
+            background-color: white;
+            color: #4CAF50;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .button-group button.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .next-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .next-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .current-answer {
+            margin-left: 10px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .submit-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .submit-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        @media screen and (max-width: 600px) {
+            .image-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .image-wrapper {
+                width: 100%;
+            }
+
+            .image-wrapper img {
+                max-width: 100%;
+            }
+
+            .button-group button {
+                padding: 8px 16px;
+                margin: 3px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Add start container -->
+    <div id="startContainer" class="container">
+        <h1>图片对比调查问卷</h1>
+        <div class="intro-text">
+            <p>感谢您参与我们的调查！</p>
+            <p>这是一份关于场景布局设计的问卷，每道题有一张场景的渲染图。</p>
+            <p>在问卷中，您将看到20组场景图片。对于每组图片，请从构图合理性、语义合理性、场景美观度三个角度综合评分, 和人类(相关从业者)平均水平进行对比：</p>
+            <p>完成整个问卷大约需要5到10分钟。感谢您的参与！</p>
+        </div>
+        <button onclick="startSurvey()" class="next-button">开始调查</button>
+    </div>
+
+    <!-- Add id to main survey container -->
+    <div id="surveyContainer" class="container" style="display: none;">
+        <h1>Image Comparison Survey</h1>
+        <div class="progress-bar">
+            <div id="progress" style="width: 0%"></div>
+            <span id="questionProgress">0/20</span>
+        </div>
+
+        <div id="imageContainer" class="image-container">
+            <div class="image-wrapper">
+                <img id="currentImage" src="" alt="Current Image">
+            </div>
+        </div>
+
+        <div id="questionContainer" class="question-container" style="display: none;">
+            <div class="question-group">
+                <p>请从以下三个维度对场景进行评分 (3分为人类从业者平均水准)：</p>
+
+                <div class="question-section">
+                    <p><strong>构图合理性</strong>：全局的构图是否合理，侧重于构图和物体摆放的整体布局</p>
+                    <div class="button-group">
+                        <button onclick="recordAnswer('composition', '1')">1分 (很差)</button>
+                        <button onclick="recordAnswer('composition', '2')">2分 (较差)</button>
+                        <button onclick="recordAnswer('composition', '3')">3分 (持平)</button>
+                        <button onclick="recordAnswer('composition', '4')">4分 (较好)</button>
+                        <button onclick="recordAnswer('composition', '5')">5分 (很好)</button>
+                    </div>
+                    <span class="current-answer" id="composition-answer"></span>
+                </div>
+
+                <div class="question-section">
+                    <p><strong>语义合理性</strong>：物体的位置是否符合逻辑</p>
+                    <div class="button-group">
+                        <button onclick="recordAnswer('semantic', '1')">1分 (很差)</button>
+                        <button onclick="recordAnswer('semantic', '2')">2分 (较差)</button>
+                        <button onclick="recordAnswer('semantic', '3')">3分 (持平)</button>
+                        <button onclick="recordAnswer('semantic', '4')">4分 (较好)</button>
+                        <button onclick="recordAnswer('semantic', '5')">5分 (很好)</button>
+                    </div>
+                    <span class="current-answer" id="semantic-answer"></span>
+                </div>
+
+                <div class="question-section">
+                    <p><strong>场景美观度</strong>：整体的美观程度</p>
+                    <div class="button-group">
+                        <button onclick="recordAnswer('aesthetic', '1')">1分 (很差)</button>
+                        <button onclick="recordAnswer('aesthetic', '2')">2分 (较差)</button>
+                        <button onclick="recordAnswer('aesthetic', '3')">3分 (持平)</button>
+                        <button onclick="recordAnswer('aesthetic', '4')">4分 (较好)</button>
+                        <button onclick="recordAnswer('aesthetic', '5')">5分 (很好)</button>
+                    </div>
+                    <span class="current-answer" id="aesthetic-answer"></span>
+                </div>
+            </div>
+
+            <button id="nextButton" onclick="loadNextImage()" class="next-button" disabled>Next Question</button>
+        </div>
+    </div>
+
+    <div id="successContainer" class="container" style="display: none;">
+        <h1>Thank You!</h1>
+        <p>Your survey has been successfully submitted.</p>
+    </div>
+
+    <script>
+        const TOTAL_QUESTIONS = 20;
+        const MAX_IMAGE_INDEX = 59; // 总图片数量减1
+        let currentQuestionIndex = 0;
+        const results = [];
+        let imageData = null;
+
+        // 生成随机不重复的图片索引数组
+        function generateRandomIndices() {
+            const indices = Array.from({ length: MAX_IMAGE_INDEX + 1 }, (_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            return indices.slice(0, TOTAL_QUESTIONS);
+        }
+
+        const randomIndices = generateRandomIndices();
+
+        async function fetchNextImage() {
+            try {
+                console.log('Fetching next expert image...');
+                if (currentQuestionIndex >= TOTAL_QUESTIONS) {
+                    showSubmitScreen();
+                    return;
+                }
+
+                const imageIndex = randomIndices[currentQuestionIndex];
+                const response = await fetch(`http://82.156.138.73:3000/expert-images/${imageIndex}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                imageData = data.image;
+                return data.image;
+            } catch (error) {
+                console.error('Error loading image:', error);
+                alert('Failed to load image. Please try again later.');
+            }
+        }
+
+        async function loadNextImage() {
+            document.getElementById('questionContainer').style.display = 'none';
+
+            const allButtons = document.querySelectorAll('.button-group button');
+            allButtons.forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('composition-answer').textContent = '';
+            document.getElementById('semantic-answer').textContent = '';
+            document.getElementById('aesthetic-answer').textContent = '';
+            document.getElementById('nextButton').disabled = true;
+
+            const imageData = await fetchNextImage();
+            if (!imageData) return;
+
+            const img = document.getElementById('currentImage');
+            await new Promise((resolve) => {
+                img.onload = () => resolve();
+                img.src = imageData.path;
+            });
+
+            document.getElementById('questionContainer').style.display = 'block';
+            currentQuestionIndex++;
+
+            document.getElementById('questionProgress').textContent =
+                `${currentQuestionIndex}/${TOTAL_QUESTIONS}`;
+
+            window.scrollTo(0, 0);
+        }
+
+        function recordAnswer(type, choice) {
+            const questionSection = document.querySelector(`.question-section:has(button[onclick*="recordAnswer('${type}'"])`);
+            if (!questionSection) {
+                console.error('Question section not found');
+                return;
+            }
+
+            // 更新按钮样式
+            const buttons = questionSection.querySelectorAll('.button-group button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            const selectedButton = Array.from(buttons).find(btn =>
+                btn.getAttribute('onclick').includes(choice)
+            );
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
+
+            // 更新当前答案显示
+            document.getElementById(`${type}-answer`).textContent = `当前评分: ${choice}`;
+
+            // 更新结果
+            const existingAnswerIndex = results.findIndex(r =>
+                r.imageIndex === currentQuestionIndex - 1
+            );
+
+            const currentAnswer = {
+                imageIndex: currentQuestionIndex - 1,
+                imagePath: imageData.path,
+                [type + 'Rating']: choice
+            };
+
+            if (existingAnswerIndex !== -1) {
+                results[existingAnswerIndex] = {
+                    ...results[existingAnswerIndex],
+                    ...currentAnswer
+                };
+            } else {
+                results.push(currentAnswer);
+            }
+
+            // 检查是否所有问题都已回答
+            const currentResult = results.find(r => r.imageIndex === currentQuestionIndex - 1);
+            const allAnswered = currentResult &&
+                currentResult.compositionRating &&
+                currentResult.semanticRating &&
+                currentResult.aestheticRating;
+
+            // 只有在所有问题都回答后才启用下一题按钮
+            document.getElementById('nextButton').disabled = !allAnswered;
+        }
+
+        function showSubmitScreen() {
+            // Hide the survey container
+            document.getElementById('questionContainer').style.display = 'none';
+
+            // Create and show submit button
+            const submitButton = document.createElement('button');
+            submitButton.textContent = '提交问卷';
+            submitButton.className = 'submit-button';
+            submitButton.onclick = submitResults;
+
+            // Add submit button to the survey container
+            const surveyContainer = document.getElementById('surveyContainer');
+            surveyContainer.appendChild(submitButton);
+        }
+
+        function submitResults() {
+            fetch('http://82.156.138.73:3000/submit-results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    results: results,
+                    expert: true  // 标记为专家评估结果
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide survey container
+                    document.getElementById('surveyContainer').style.display = 'none';
+                    // Show success container
+                    document.getElementById('successContainer').style.display = 'block';
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                })
+                .catch(error => {
+                    console.error('Error submitting results:', error);
+                    alert('提交结果时出错，请重试。');
+                });
+        }
+
+        // Modify startSurvey to just show container and load first image
+        function startSurvey() {
+            document.getElementById('startContainer').style.display = 'none';
+            document.getElementById('surveyContainer').style.display = 'block';
+            loadNextImage();
+        }
+    </script>
+</body>
+
+</html>

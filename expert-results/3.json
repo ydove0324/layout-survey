@@ -1,0 +1,142 @@
+[
+  {
+    "imageIndex": 0,
+    "imagePath": "experts/paper_living_room_7_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "4"
+  },
+  {
+    "imageIndex": 1,
+    "imagePath": "experts/paper_bedroom_16_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "5",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 2,
+    "imagePath": "experts/paper_dining_room_10_render_resutls.png",
+    "compositionRating": "2",
+    "semanticRating": "2",
+    "aestheticRating": "2"
+  },
+  {
+    "imageIndex": 3,
+    "imagePath": "experts/paper_living_room_11_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "4"
+  },
+  {
+    "imageIndex": 4,
+    "imagePath": "experts/paper_bedroom_2_render_resutls.png",
+    "compositionRating": "3",
+    "semanticRating": "4",
+    "aestheticRating": "4"
+  },
+  {
+    "imageIndex": 5,
+    "imagePath": "experts/paper_bedroom_15_render_resutls.png",
+    "semanticRating": "4",
+    "compositionRating": "5",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 6,
+    "imagePath": "experts/paper_living_room_14_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 7,
+    "imagePath": "experts/paper_bedroom_13_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "3",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 8,
+    "imagePath": "experts/paper_waiting_room_1_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 9,
+    "imagePath": "experts/paper_dining_room_9_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 10,
+    "imagePath": "experts/A_corporate_conference_room_with_wooden__1.png",
+    "compositionRating": "5",
+    "semanticRating": "5",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 11,
+    "imagePath": "experts/paper_living_room_18_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 12,
+    "imagePath": "experts/paper_living_room_4_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "5",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 13,
+    "imagePath": "experts/paper_dining_room_1_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 14,
+    "imagePath": "experts/paper_living_room_17_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "4"
+  },
+  {
+    "imageIndex": 15,
+    "imagePath": "experts/paper_bedroom_17_render_resutls.png",
+    "compositionRating": "4",
+    "semanticRating": "4",
+    "aestheticRating": "4"
+  },
+  {
+    "imageIndex": 16,
+    "imagePath": "experts/paper_bedroom_5_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 17,
+    "imagePath": "experts/paper_bathroom_2_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "5",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 18,
+    "imagePath": "experts/paper_bedroom_6_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "4",
+    "aestheticRating": "5"
+  },
+  {
+    "imageIndex": 19,
+    "imagePath": "experts/paper_bedroom_1_render_resutls.png",
+    "compositionRating": "5",
+    "semanticRating": "5",
+    "aestheticRating": "5"
+  }
+]

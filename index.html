@@ -154,8 +154,12 @@
         <h1>图片对比调查问卷</h1>
         <div class="intro-text">
             <p>感谢您参与我们的调查！</p>
-            <p>这是一份关于场景布局设计的问卷，每道题有一张场景的渲染图。</p>
-            <p>在问卷中，您将看到20组场景图片。对于每组图片，请从构图合理性、语义合理性、场景美观度三个角度综合评分, 和人类(相关从业者)平均水平进行对比：</p>
+            <p>这是一份关于室内场景布局设计的问卷，请忽略家具的具体样式。在这些图像中，相同颜色的物体代表一个独立的模型。</p>
+            <p>在问卷中，您将看到20组室内场景图片。对于每组图片，请回答以下两个问题：</p>
+            <ul>
+                <li>哪个房间的摆放更真实合理？</li>
+                <li>哪个房间的摆放更美观？</li>
+            </ul>
             <p>完成整个问卷大约需要5到10分钟。感谢您的参与！</p>
         </div>
         <button onclick="startSurvey()" class="next-button">开始调查</button>
@@ -171,22 +175,35 @@
 
         <div id="imageContainer" class="image-container">
             <div class="image-wrapper">
-                <img id="currentImage" src="" alt="Current Image">
+                <img id="imageA" src="" alt="Image A">
+                <span class="image-label">A</span>
+            </div>
+            <div class="image-wrapper">
+                <img id="imageB" src="" alt="Image B">
+                <span class="image-label">B</span>
             </div>
         </div>
 
-        <div id="questionContainer" class="question-container">
+        <div id="questionContainer" class="question-container" style="display: none;">
             <div class="question-group">
-                <p>请从构图合理性、语义合理性、场景美观度三个角度综合评分, 和人类(相关从业者)平均水平进行对比：</p>
+                <p>哪个房间的摆放看起来更真实合理？</p>
                 <div class="button-group">
-                    <button onclick="recordAnswer('overall', 'less')">比人类平均水平差</button>
-                    <button onclick="recordAnswer('overall', 'equal')">和人类平均水平相当</button>
-                    <button onclick="recordAnswer('overall', 'greater')">比人类平均水平好</button>
+                    <button onclick="recordAnswer('realistic', 'A')">A</button>
+                    <button onclick="recordAnswer('realistic', 'B')">B</button>
                 </div>
-                <span class="current-answer" id="overall-answer"></span>
+                <span class="current-answer" id="realistic-answer"></span>
             </div>
 
-            <button id="nextButton" onclick="loadNextImage()" class="next-button" disabled>Next Question</button>
+            <div class="question-group">
+                <p>哪个房间的摆放看起来更美观？（只关注摆放布局，不考虑家具本身的样式）</p>
+                <div class="button-group">
+                    <button onclick="recordAnswer('beautiful', 'A')">A</button>
+                    <button onclick="recordAnswer('beautiful', 'B')">B</button>
+                </div>
+                <span class="current-answer" id="beautiful-answer"></span>
+            </div>
+
+            <button id="nextButton" onclick="loadNextImagePair()" class="next-button" disabled>Next Question</button>
         </div>
     </div>
 
@@ -197,86 +214,129 @@
 
     <script>
         const TOTAL_QUESTIONS = 20;
-        let images = [];  // 将从 expert_image.json 加载
+        let imagePairs = [];  // Changed to let since we'll assign it from server
         const results = [];
-        let currentImageIndex = 0;
+        let currentPairIndex = 0;
+        let questionCount = 0;
 
         async function fetchImageList() {
             try {
-                const response = await fetch('expert_image.json');
+                console.log('Fetching image pairs from backend...');
+                const response = await fetch('http://82.156.138.73:3000/image-pairs');
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                images = await response.json();
-                loadNextImage();
+
+                // Directly assign the image pairs from server
+                imagePairs = await response.json();
+                console.log('Successfully loaded image pairs:', imagePairs);
+                loadNextImagePair();
             } catch (error) {
-                console.error('Error loading images:', error);
-                alert('Failed to load images. Please try again.');
+                console.error('Error loading image pairs:', error);
+                alert('Failed to load images. Please try again later.');
             }
         }
 
-        function loadNextImage() {
-            if (currentImageIndex >= TOTAL_QUESTIONS) {
+        function loadNextImagePair() {
+            if (questionCount >= TOTAL_QUESTIONS) {
                 showSubmitScreen();
                 return;
             }
 
-            // 重置按钮和答案显示
+            // Hide question container while loading
+            document.getElementById('questionContainer').style.display = 'none';
+
+            // Reset all buttons and current answer displays
             const allButtons = document.querySelectorAll('.button-group button');
             allButtons.forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('overall-answer').textContent = '';
+            document.getElementById('realistic-answer').textContent = '';
+            document.getElementById('beautiful-answer').textContent = '';
 
-            // 禁用下一题按钮
+            // Disable next button
             document.getElementById('nextButton').disabled = true;
 
-            // 加载当前图片
-            const currentImage = images[currentImageIndex];
-            document.getElementById('currentImage').src = currentImage.path;
-            currentImageIndex++;
+            // Use the pre-generated pair from server
+            const pair = imagePairs[questionCount];
 
-            // 更新进度
-            document.getElementById('questionProgress').textContent = `${currentImageIndex}/${TOTAL_QUESTIONS}`;
+            // Create promise for both images loading
+            const imageAPromise = new Promise((resolve) => {
+                const imgA = document.getElementById('imageA');
+                imgA.onload = () => resolve();
+                imgA.src = pair.imageA;
+            });
 
-            // 滚动到页面顶部
-            window.scrollTo(0, 0);
+            const imageBPromise = new Promise((resolve) => {
+                const imgB = document.getElementById('imageB');
+                imgB.onload = () => resolve();
+                imgB.src = pair.imageB;
+            });
+
+            // Wait for both images to load
+            Promise.all([imageAPromise, imageBPromise]).then(() => {
+                // Show question container after images are loaded
+                document.getElementById('questionContainer').style.display = 'block';
+                questionCount++;
+
+                // Update progress
+                document.getElementById('questionProgress').textContent = `${questionCount}/${TOTAL_QUESTIONS}`;
+
+                // Scroll to top of page
+                window.scrollTo(0, 0);
+            });
         }
 
         function recordAnswer(type, choice) {
-            const questionGroup = document.querySelector('.question-group');
+            // Get the specific question group based on type
+            const questionGroups = document.querySelectorAll('.question-group');
+            const questionGroup = type === 'realistic' ? questionGroups[0] : questionGroups[1];
             if (!questionGroup) {
                 console.error('Question group not found');
                 return;
             }
 
-            // 更新按钮样式
+            // Find and update buttons in the question group
             const buttons = questionGroup.querySelectorAll('.button-group button');
             buttons.forEach(btn => btn.classList.remove('selected'));
-            const selectedButton = Array.from(buttons).find(btn =>
-                btn.getAttribute('onclick').includes(choice)
-            );
+
+            // Set selected button style
+            const selectedButton = Array.from(buttons).find(btn => btn.textContent === choice);
             if (selectedButton) {
                 selectedButton.classList.add('selected');
             }
 
-            // 更新当前答案显示
-            document.getElementById('overall-answer').textContent = `当前评分: ${choice}`;
+            // Update current answer display
+            document.getElementById(`${type}-answer`).textContent = `Current answer: ${choice}`;
 
-            // 更新结果
+            // Remove any existing answer for this question type
             const existingAnswerIndex = results.findIndex(r =>
-                r.imageIndex === currentImageIndex - 1
+                r.question === questionCount && r.type === type
             );
             if (existingAnswerIndex !== -1) {
                 results.splice(existingAnswerIndex, 1);
             }
 
+            // Add new answer
+            const currentPair = imagePairs[questionCount - 1];
             results.push({
-                imageIndex: currentImageIndex - 1,
-                imagePath: images[currentImageIndex - 1].path,
-                rating: choice
+                question: questionCount,
+                type: type,
+                choice: choice,
+                pairIndex: questionCount - 1,
+                imageType: currentPair.type,
+                sourceA: currentPair.sourceA,
+                sourceB: currentPair.sourceB,
+                imageA: currentPair.imageA,
+                imageB: currentPair.imageB
             });
 
-            // 启用下一题按钮
-            document.getElementById('nextButton').disabled = false;
+            // Check if both questions are answered
+            const currentResults = results.filter(r => r.question === questionCount);
+            const nextButton = document.getElementById('nextButton');
+            const submitButton = document.querySelector('.submit-button');
+
+            if (nextButton) nextButton.disabled = currentResults.length < 2;
+            if (submitButton) submitButton.disabled = currentResults.length < 2;
         }
 
         function showSubmitScreen() {
@@ -295,12 +355,12 @@
             nextButton.parentNode.appendChild(submitButton);
 
             // Update the button enable/disable logic
-            const currentResults = results.filter(r => r.imageIndex === currentImageIndex - 1);
-            submitButton.disabled = currentResults.length < 3;
+            const currentResults = results.filter(r => r.question === questionCount);
+            submitButton.disabled = currentResults.length < 2;
         }
 
         function submitResults() {
-            fetch('http://62.234.18.48:3000/submit-results', {
+            fetch('http://82.156.138.73:3000/submit-results', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

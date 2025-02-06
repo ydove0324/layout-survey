@@ -2,4 +2,7 @@ results/
 diffuscene/
 layoutGPT/
 ours/
-node_modules/
+node_modules
+*.rar
+experts
+holodeck/
